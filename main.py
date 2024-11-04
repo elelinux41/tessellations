@@ -21,6 +21,8 @@ fig, ax = plt.subplots()
 #Parkettierungen erstellen und anzeigen
 tess = Tessellation(polygon, extend=extend)
 tess.show(ax, 'blue', True)
+
+#Duale Parkettierung daraufsetzten
 tess.get_dual().show(ax, 'goldenrod')
 
 #Ziele im Kreis um center erstellen
@@ -33,16 +35,6 @@ circle_points = distribute_points_on_circle(center, radius, num_points, ax)
 medium_length = tess.medium_route(center, circle_points, ax, 5)
 print("Durchschnittsroutenlänge für eine Luftlinie von " + str(round(radius,2)) + " Einheiten: " + str(round(medium_length,2)))
 print("Das entspricht einer durchschnittlichen Verlängerung von: " + str(round(((medium_length/radius - 1) * 100), 2)) + "%")
-
-#Legende anzeigen
-patches = [
-    mpt.Patch(color="blue", label="Kanal"),
-    mpt.Patch(color="goldenrod", label="Weg"),
-    mpt.Patch(color="red", label="Ziele mit der selben Luftline zum Mittelpunkt"),
-    mpt.Patch(color="green", label="nächstliegender Punkt auf einem Pfad zu einem Ziel"),
-    mpt.Patch(color="magenta", label="kürzester Pfad zu einem zufälligen Ziel")
-]
-ax.legend(handles=patches, title="Legende", bbox_to_anchor=(1,1))
 
 #Achsen ausblenden
 ax.set_xticks([])
