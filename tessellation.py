@@ -38,7 +38,7 @@ class Tessellation:
         rotation90
             spiegelt die Parkettierung an y=x
         '''
-        if self.type not in self.library.keys():
+        if type not in self.library.keys():
             raise ValueError("Parkettierung nicht bekannt")
         self.type = type
         self.extend = extend
