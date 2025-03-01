@@ -8,6 +8,7 @@ Parkettierungen die es samt Knoten, Kanten und dualer Parkettierung erstellen ka
 <li>4-8-8
 <li>3-6-3-6
 <li>4-6-12
+<li>3-4-6-4
 <li>3-3-4-3-4
 <li>3-3-3-3-6
 <li>5-5-10 (modifiziert durch Sechsecke)
