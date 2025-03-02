@@ -16,8 +16,12 @@ class Tessellation:
         "3-6-3-6-dual": ((2/(3**.5), 1), "Rautenparkettierung"),
         "4-6-12": ((1/(4+3**.5), 2 / (3**.5)/(4+3**.5)), None),
         "4-6-12-dual": ((1/(4+3**.5), 2 / (3**.5)/(4+3**.5)), None),
+        "3-12-12": ((1/(2+3**.5), 1/(1.5+3**.5)), None),
+        "3-12-12-dual": ((1/(2+3**.5), 1/(1.5+3**.5)), None),
         "3-3-4-3-4": (((2 + 3**.5)**-.5, (2 + 3**.5)**-.5), None),
         "3-3-4-3-4-dual": ((6**-.5, 2 * 6**-.5), "katalanische Parkettierung"),
+        "3-3-3-4-4": ((1, 1/(1+(3**.5/2))), None),
+        "3-3-3-4-4-dual": ((1, 1/(1+(3**.5/2))), None),
         "3-4-6-4": ((1/(1+3**.5), 2 / (3+3**.5)), None),
         "3-4-6-4-dual": ((1/(1+3**.5), 2 / (3+3**.5)), None),
         "3-3-3-3-6": ((1/7, 2/ 3**.5), None),
@@ -147,6 +151,21 @@ class Tessellation:
                                         self.lines.append(((point_b[0], point[0]),(point_b[1], point[1])))
                             self.lines.append(((x, point_b[0]),(y, point_b[1])))
                         to_append.append((x,y))
+                    
+                    elif self.type == "3-12-12":
+                        x = col * self.spacing * (2+3**.5) + self.origin[0]
+                        y = row * self.spacing * (1.5+3**.5) + self.origin[1]
+                        if row % 2 == 1:
+                            x += self.spacing * (2+3**.5)/2
+                        to_append += distribute_points_on_circle((x,y), self.spacing * (2+3**.5)**.5, 12, displacement=np.pi/12)[1:7]
+                    
+                    elif self.type == "3-12-12-dual":
+                        x = col * self.spacing * (2+3**.5) + self.origin[0]
+                        y = row * self.spacing * (1.5+3**.5) + self.origin[1]
+                        if row % 2 == 1:
+                            x += self.spacing * (2+3**.5)/2
+                        to_append.append((x,y))
+                        to_append += distribute_points_on_circle((x,y), self.spacing * (2+3**.5+3**-.5)/2, 6, displacement=np.pi/6)[0:2]
 
                     elif self.type == "3-3-4-3-4":
                         x = col * self.spacing * (2 + 3**.5)**.5 + self.origin[0]
@@ -161,7 +180,20 @@ class Tessellation:
                             to_append = distribute_points_on_circle((x,y), self.spacing, 4, displacement=np.pi/12)
                         to_append.append((x,y))
                     
-                    #noch nicht dual versehen
+                    elif self.type == "3-3-3-4-4":
+                        x = col * self.spacing + self.origin[0]
+                        y = row * self.spacing * (1+(3**.5/2)) + self.origin[1]
+                        if row % 2 == 1:
+                            x += self.spacing / 2
+                        to_append += [(x,y), (x,y+self.spacing)]
+                    
+                    elif self.type == "3-3-3-4-4-dual":
+                        x = col * self.spacing + self.origin[0]
+                        y = row * self.spacing * (1+(3**.5/2)) + self.origin[1]
+                        if row % 2 == 1:
+                            x += self.spacing / 2
+                        to_append += [(x,y),(x,y+self.spacing/(2*3**.5)+self.spacing/2),(x,y-self.spacing/(2*3**.5)-self.spacing/2)]
+                    
                     elif self.type == "3-4-6-4":
                         x = col * self.spacing * (1+3**.5) + self.origin[0]
                         y = row * self.spacing * (3+3**.5)/2 + self.origin[1]
@@ -244,6 +276,15 @@ class Tessellation:
                                         if np.isclose(np.hypot(point[0] - nx, point[1] - ny), self.spacing* (3**.5 -1)):
                                             self.lines.append(((point[0], nx),(point[1], ny)))
                             
+                            elif self.type == "3-3-3-4-4-dual":
+                                if np.isclose(np.hypot(x - nx, y - ny), self.spacing*(1/(2*3**.5)+.5)):
+                                    self.lines.append(((x, nx),(y, ny)))
+                                if col % 2 == 1 \
+                                    and np.isclose(np.hypot(x - nx, y - ny), self.spacing):
+                                        self.lines.append(((x, nx),(y, ny)))
+                                if np.isclose(np.hypot(to_append[1][0] - nx, to_append[1][1] - ny), self.spacing*3**-.5):
+                                    self.lines.append(((to_append[1][0], nx),(to_append[1][1], ny)))
+                            
                             elif self.type == "3-3-3-3-6-dual":
                                 #Strecken werden hier schon zum Teil bei der Punktgenerierung gezeichnet
                                 if np.isclose(np.hypot(to_append[-2][0] - nx, to_append[-2][1] - ny), self.spacing/3**.5):
@@ -274,6 +315,14 @@ class Tessellation:
                                 for point in to_append[4:6]:
                                     if np.isclose(np.hypot(point[0] - nx, point[1] - ny), self.spacing * (1+3**-.5)/2):
                                         self.lines.append(((point[0], nx),(point[1], ny)))
+                            
+                            elif self.type == "3-12-12-dual":
+                                if np.isclose(np.hypot(to_append[0][0] - nx, to_append[0][1] - ny), self.spacing * (2+3**.5+3**-.5)/2):
+                                    self.lines.append(((to_append[0][0], nx),(to_append[0][1], ny)))
+                                if np.isclose(np.hypot(to_append[0][0] - nx, to_append[0][1] - ny), self.spacing * (2+3**.5)) \
+                                    and (np.isclose(np.hypot(to_append[1][0] - nx, to_append[1][1] - ny), self.spacing * (2+3**.5+3**-.5)/2) \
+                                    or np.isclose(np.hypot(to_append[2][0] - nx, to_append[2][1] - ny), self.spacing * (2+3**.5+3**-.5)/2)):
+                                        self.lines.append(((to_append[0][0], nx),(to_append[0][1], ny)))
 
                             elif self.type == "4-6-12-dual":
                                 #Anomalie! Strecken werden hier schon bei der Punktgenerierung gezeichnet
@@ -414,6 +463,22 @@ class Tessellation:
                     extend=self.extend-2,
                     rotation90=self.rotation90
                 )
+            elif self.type == "3-3-3-4-4":
+                self._dual = Tessellation(
+                    "3-3-3-4-4-dual",
+                    origin=(self.origin[0] + self.spacing / 2, self.origin[1] + self.spacing / 2),
+                    spacing=self.spacing,
+                    extend=self.extend,
+                    rotation90=self.rotation90
+                )
+            elif self.type == "3-3-3-4-4-dual":
+                self._dual = Tessellation(
+                    "3-3-3-4-4",
+                    origin=(self.origin[0] + self.spacing / 2, self.origin[1] - self.spacing / 2),
+                    spacing=self.spacing,
+                    extend=self.extend,
+                    rotation90=self.rotation90
+                )
             elif self.type == "3-3-3-3-6":
                 self._dual = Tessellation(
                     "3-3-3-3-6-dual",
@@ -457,6 +522,22 @@ class Tessellation:
             elif self.type == "3-4-6-4-dual":
                 self._dual = Tessellation(
                     "3-4-6-4",
+                    origin=self.origin,
+                    spacing=self.spacing,
+                    extend=self.extend,
+                    rotation90=self.rotation90
+                )
+            elif self.type == "3-12-12":
+                self._dual = Tessellation(
+                    "3-12-12-dual",
+                    origin=self.origin,
+                    spacing=self.spacing,
+                    extend=self.extend,
+                    rotation90=self.rotation90
+                )
+            elif self.type == "3-12-12-dual":
+                self._dual = Tessellation(
+                    "3-12-12",
                     origin=self.origin,
                     spacing=self.spacing,
                     extend=self.extend,
